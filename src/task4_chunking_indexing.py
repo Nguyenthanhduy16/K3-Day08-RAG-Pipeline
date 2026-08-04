@@ -63,22 +63,42 @@ COLLECTION_NAME = "university_services_docs"
 # IMPLEMENTATION
 # =============================================================================
 
+def _extract_character_name(filename: str, content: str):
+    """
+    Extract character name from char_XXXX_NNN.md files.
+    Parses the first '# Profile of ...' heading in the file.
+    Returns None for non-character files.
+    """
+    import re
+    if not filename.startswith("char_"):
+        return None
+    match = re.search(r"^#\s+(?:Profile of|Character Profile:)\s+(.+)$", content, re.MULTILINE)
+    if match:
+        return match.group(1).strip()
+    return None
+
+
 def load_documents() -> list[dict]:
     """
-    Đọc toàn bộ markdown files từ data/standardized/.
+    Doc toan bo markdown files tu data/standardized/.
+    Voi file char_XXXX_NNN.md, tu dong extract ten nhan vat vao metadata
+    de BM25 va semantic search co the match theo ten.
 
     Returns:
-        List of {'content': str, 'metadata': {'source': str, 'type': str}}
+        List of {'content': str, 'metadata': {'source': str, 'type': str, 'character': str?}}
     """
     documents = []
     if STANDARDIZED_DIR.exists():
         for md_file in STANDARDIZED_DIR.rglob("*.md"):
             content = md_file.read_text(encoding="utf-8")
             doc_type = "legal" if "legal" in str(md_file) else "news"
-            documents.append({
-                "content": content,
-                "metadata": {"source": md_file.name, "type": doc_type}
-            })
+            metadata = {"source": md_file.name, "type": doc_type}
+
+            char_name = _extract_character_name(md_file.name, content)
+            if char_name:
+                metadata["character"] = char_name
+
+            documents.append({"content": content, "metadata": metadata})
     return documents
 
 
