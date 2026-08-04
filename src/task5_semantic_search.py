@@ -57,9 +57,10 @@ def semantic_search(query: str, top_k: int = 10) -> list[dict]:
     if query_vector is None:
         return []
 
+    # Retrieve a larger set of candidates so that post-filtering doesn't leave us empty-handed
     results = collection.query(
         query_embeddings=[query_vector],
-        n_results=top_k,
+        n_results=max(40, top_k * 4),
         include=["documents", "metadatas", "distances"],
     )
 

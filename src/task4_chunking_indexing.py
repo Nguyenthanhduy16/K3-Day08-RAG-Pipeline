@@ -60,22 +60,123 @@ COLLECTION_NAME = "university_services_docs"
 
 
 # =============================================================================
-# IMPLEMENTATION
-# =============================================================================
+# Japanese → English name mapping for all crawled characters
+# Source: uma.guide romanizations
+_JP_TO_EN: dict[str, str] = {
+    "スペシャルウィーク": "Special Week",
+    "サイレンススズカ": "Silence Suzuka",
+    "トウカイテイオー": "Tokai Teio",
+    "マルゼンスキー": "Maruzensky",
+    "フジキセキ": "Fuji Kiseki",
+    "オグリキャップ": "Oguri Cap",
+    "ゴールドシップ": "Gold Ship",
+    "ウオッカ": "Vodka",
+    "ダイワスカーレット": "Daiwa Scarlet",
+    "タイキシャトル": "Taiki Shuttle",
+    "グラスワンダー": "Grass Wonder",
+    "ヒシアマゾン": "Hishi Amazon",
+    "メジロマックイーン": "Mejiro McQueen",
+    "エルコンドルパサー": "El Condor Pasa",
+    "テイエムオペラオー": "TM Opera O",
+    "ナリタブライアン": "Narita Brian",
+    "シンボリルドルフ": "Symboli Rudolf",
+    "エアグルーヴ": "Air Groove",
+    "アグネスデジタル": "Agnes Digital",
+    "セイウンスカイ": "Seiun Sky",
+    "タマモクロス": "Tamamo Cross",
+    "ファインモーション": "Fine Motion",
+    "ビワハヤヒデ": "Biwa Hayahide",
+    "マヤノトップガン": "Mayano Top Gun",
+    "マンハッタンカフェ": "Manhattan Cafe",
+    "ミホノブルボン": "Mihono Bourbon",
+    "メジロライアン": "Mejiro Ryan",
+    "ヒシミラクル": "Hishi Miracle",
+    "エイシンフラッシュ": "Eishin Flash",
+    "カレンチャン": "Karen Chan",
+    "コパノリッキー": "Copano Rickey",
+    "ドリームジャーニー": "Dream Journey",
+    "ゴールドシチー": "Gold City",
+    "スターリングローズ": "Starling Rose",
+    "フクキタル": "Fuku Kitaru",
+    "ライスシャワー": "Rice Shower",
+    "イクノディクタス": "Ikuno Dictus",
+    "スマートファルコン": "Smart Falcon",
+    "エルコンドルパサー": "El Condor Pasa",
+    "サクラバクシンオー": "Sakura Bakushin O",
+    "ナカヤマフェスタ": "Nakayama Festa",
+    "ヴィルシーナ": "Virshina",
+    "ヴィブロス": "Vivlos",
+    "アドマイヤベガ": "Admire Vega",
+    "ニシノフラワー": "Nishino Flower",
+    "ハルウララ": "Haru Urara",
+    "キタサンブラック": "Kitasan Black",
+    "サトノダイヤモンド": "Satono Diamond",
+    "シリウスシンボリ": "Sirius Symboli",
+    "メジロアルダン": "Mejiro Ardan",
+    "ロイスアンドロイス": "Royce and Royce",
+    "アグネスタキオン": "Agnes Tachyon",
+    "アドマイヤグルーヴ": "Admire Groove",
+    "サクラローレル": "Sakura Laurel",
+    "ツインターボ": "Twin Turbo",
+    "テンポイント": "Tenpointö",
+    "ニッポンテイオー": "Nippon Teio",
+    "マーベラスサンデー": "Marvelous Sunday",
+    "タニノギムレット": "Tanino Gimlet",
+    "ゼンノロブロイ": "Zenno Rob Roy",
+    "キングヘイロー": "King Halo",
+    "ナリタトップロード": "Narita Top Road",
+    "ユキノビジン": "Yukino Bijin",
+    "トーセンジョーダン": "Tosen Jordan",
+    "スーパークリーク": "Super Creek",
+    "イナリワン": "Inari One",
+    "カツラギエース": "Katsuragi Ace",
+    "ダイイチルビー": "Daiichi Ruby",
+    "ハッピーミーク": "Happy Meek",
+    "ウインバリアシオン": "Win Variation",
+    "メジロパーマー": "Mejiro Palmer",
+    "ドゥラメンテ": "Duramente",
+    "ラインクラフト": "Linecraft",
+    "メジロドーベル": "Mejiro Dober",
+    "テイオー": "Tokai Teio",
+    "サクラチヨノオー": "Sakura Chiyono O",
+    "メジロブライト": "Mejiro Bright",
+    "トランセンド": "Transcend",
+    "ノースフライト": "North Flight",
+    "シングウィズミー": "Sing With Me",
+    "エスポワールシチー": "Espoir City",
+    "ナカヤマフェスタ": "Nakayama Festa",
+    "メジロラモーヌ": "Mejiro Ramonu",
+    "サトノクラウン": "Satono Crown",
+    "シュヴァルグラン": "Cheval Grand",
+    "ラッキーライラック": "Lucky Lilac",
+    "グランアレグリア": "Gran Alegria",
+    "ラヴズオンリーユー": "Loves Only You",
+    "ルーラーシップ": "Rulership",
+    "ナリタブライアン": "Narita Brian",
+    "ケイエスミラクル": "KS Miracle",
+    "スティルインラブ": "Still in Love",
+    "デュランダル": "Durandal",
+    "フサイチパンドラ": "Fusaichi Pandora",
+    "カルストンライトオ": "Karuston Light O",
+    "ヒシミラクル": "Hishi Miracle",
+    "ハルウララ": "Haru Urara",
+}
+
 
 def _extract_character_name(filename: str, content: str):
     """
     Extract character name from char_XXXX_NNN.md files.
-    Parses the first '# Profile of ...' heading in the file.
-    Returns None for non-character files.
+    Returns (japanese_name, english_name) or None.
     """
     import re
     if not filename.startswith("char_"):
         return None
     match = re.search(r"^#\s+(?:Profile of|Character Profile:)\s+(.+)$", content, re.MULTILINE)
-    if match:
-        return match.group(1).strip()
-    return None
+    if not match:
+        return None
+    jp_name = match.group(1).strip()
+    en_name = _JP_TO_EN.get(jp_name)
+    return jp_name, en_name
 
 
 def load_documents() -> list[dict]:
@@ -94,9 +195,12 @@ def load_documents() -> list[dict]:
             doc_type = "legal" if "legal" in str(md_file) else "news"
             metadata = {"source": md_file.name, "type": doc_type}
 
-            char_name = _extract_character_name(md_file.name, content)
-            if char_name:
-                metadata["character"] = char_name
+            char_info = _extract_character_name(md_file.name, content)
+            if char_info:
+                jp_name, en_name = char_info
+                metadata["character_jp"] = jp_name
+                metadata["character_en"] = en_name or ""
+                metadata["character"] = f"{jp_name} ({en_name})" if en_name else jp_name
 
             documents.append({"content": content, "metadata": metadata})
     return documents
@@ -140,9 +244,20 @@ def chunk_documents(documents: list[dict]) -> list[dict]:
     for doc in documents:
         md_chunks = md_splitter.split_text(doc["content"])
 
+        # Inject character name context directly into text to ensure BM25 & Semantic Search match
+        char_prefix = ""
+        metadata = doc["metadata"]
+        if "character_en" in metadata and metadata["character_en"]:
+            char_prefix = f"Nhân vật (Character): {metadata['character_en']} ({metadata['character_jp']}) - thông tin cá nhân, profile, sinh nhật (birthdate), chỉ số (stats), cự ly (distance), chiến thuật (strategy), thích ứng (adaptability)\n\n"
+        elif "character_jp" in metadata and metadata["character_jp"]:
+            char_prefix = f"Nhân vật (Character): {metadata['character_jp']} - thông tin cá nhân, profile, sinh nhật (birthdate), chỉ số (stats), cự ly (distance), chiến thuật (strategy), thích ứng (adaptability)\n\n"
+
         chunk_index = 0
         for md_chunk in md_chunks:
             text = md_chunk.page_content
+            if char_prefix:
+                text = char_prefix + text
+
             # Merge heading metadata from splitter with document metadata
             heading_meta = md_chunk.metadata or {}
 
@@ -152,10 +267,17 @@ def chunk_documents(documents: list[dict]) -> list[dict]:
                 sub_texts = [text]
 
             for sub_text in sub_texts:
-                if not sub_text.strip():
+                # Filter out chunks that are too short to be useful (e.g. empty headers/titles)
+                # 60 chars is a safe limit to preserve profiles and event lists but filter noise.
+                if len(sub_text.strip()) < 60:
                     continue
+                # If chunk was sub-split, ensure sub_text keeps the prefix if it's not already there
+                final_text = sub_text
+                if char_prefix and not final_text.startswith(char_prefix.strip()):
+                    final_text = char_prefix + final_text
+
                 chunks.append({
-                    "content": sub_text,
+                    "content": final_text,
                     "metadata": {
                         **doc["metadata"],
                         **heading_meta,
@@ -172,11 +294,22 @@ def _fallback_chunk(documents: list[dict]) -> list[dict]:
     chunks = []
     for doc in documents:
         splits = _fallback_split_text(doc["content"])
+        
+        char_prefix = ""
+        metadata = doc["metadata"]
+        if "character_en" in metadata and metadata["character_en"]:
+            char_prefix = f"Nhân vật (Character): {metadata['character_en']} ({metadata['character_jp']}) - thông tin cá nhân, profile, sinh nhật (birthdate), chỉ số (stats), cự ly (distance), chiến thuật (strategy), thích ứng (adaptability)\n\n"
+        elif "character_jp" in metadata and metadata["character_jp"]:
+            char_prefix = f"Nhân vật (Character): {metadata['character_jp']} - thông tin cá nhân, profile, sinh nhật (birthdate), chỉ số (stats), cự ly (distance), chiến thuật (strategy), thích ứng (adaptability)\n\n"
+
         for i, chunk_text in enumerate(splits):
-            if not chunk_text.strip():
+            if len(chunk_text.strip()) < 60:
                 continue
+            final_text = chunk_text
+            if char_prefix:
+                final_text = char_prefix + final_text
             chunks.append({
-                "content": chunk_text,
+                "content": final_text,
                 "metadata": {**doc["metadata"], "chunk_index": i},
             })
     return chunks
