@@ -25,3 +25,14 @@ pageindex_pdfs/
 # OS
 .DS_Store
 Thumbs.db
+
+# User exclusions
+data/landing/full_guide/
+*.rar
+
+# Lab 08 local data exclusions
+data/landing/legal/
+data/landing/news/
+data/standardized/
+chroma_db/
+
