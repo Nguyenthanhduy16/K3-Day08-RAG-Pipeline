@@ -83,9 +83,11 @@ def _generate_hypothetical_doc(query: str) -> str:
     chay duoc ma khong can API key.
     """
     return (
-        "This university policy or student service document answers the question: "
-        f"{query}. It contains relevant details, requirements, procedures, fees, "
-        "eligibility conditions, deadlines, contact points, and official guidance."
+        "This Uma Musume Pretty Derby game guide answers the question: "
+        f"{query}. It contains relevant details about training strategies, "
+        "stats (Speed, Stamina, Power, Guts, Wisdom), skills, aptitudes, "
+        "scenarios (URA, MANT, Grand Live, Aoharu), support cards, "
+        "inheritance, PvP Stadium, and race mechanics."
     )
 
 
