@@ -15,8 +15,11 @@ quyết định fallback ở Task 9 — xem ghi chú ở đó.
 """
 
 import os
-import requests
-from dotenv import load_dotenv
+try:
+    import requests
+except ImportError:
+    requests = None
+from .env_utils import load_dotenv
 
 load_dotenv()
 JINA_API_KEY = os.getenv("JINA_API_KEY")
@@ -51,8 +54,8 @@ def rerank_cross_encoder(
     if not candidates:
         return []
 
-    if not JINA_API_KEY:
-        print("Warning: JINA_API_KEY not found in environment. Falling back to original order.")
+    if not JINA_API_KEY or requests is None:
+        print("Warning: Jina reranker unavailable. Falling back to original order.")
         return candidates[:top_k]
 
     try:

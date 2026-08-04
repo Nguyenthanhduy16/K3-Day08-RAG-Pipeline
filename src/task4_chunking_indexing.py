@@ -31,7 +31,7 @@ trong cùng collection, retrieval sẽ trả về kết quả rác từ dữ li�
 """
 
 from pathlib import Path
-from dotenv import load_dotenv
+from .env_utils import load_dotenv
 
 # Load .env file
 load_dotenv(Path(__file__).parent.parent / ".env")
@@ -83,26 +83,72 @@ def load_documents() -> list[dict]:
 
 def chunk_documents(documents: list[dict]) -> list[dict]:
     """
-    Chunk documents theo strategy đã chọn.
+    Chunk documents using the configured strategy.
 
     Returns:
-        List of {'content': str, 'metadata': dict} — mỗi item là 1 chunk
+        List of {'content': str, 'metadata': dict}; each item is one chunk.
     """
-    from langchain_text_splitters import RecursiveCharacterTextSplitter
+    try:
+        from langchain_text_splitters import RecursiveCharacterTextSplitter
 
-    splitter = RecursiveCharacterTextSplitter(
-        chunk_size=CHUNK_SIZE,
-        chunk_overlap=CHUNK_OVERLAP,
-        separators=["\n\n", "\n", ". ", " ", ""]
-    )
+        splitter = RecursiveCharacterTextSplitter(
+            chunk_size=CHUNK_SIZE,
+            chunk_overlap=CHUNK_OVERLAP,
+            separators=["\n\n", "\n", ". ", " ", ""]
+        )
+        split_text = splitter.split_text
+    except ImportError:
+        split_text = _fallback_split_text
+
     chunks = []
     for doc in documents:
-        splits = splitter.split_text(doc["content"])
+        splits = split_text(doc["content"])
         for i, chunk_text in enumerate(splits):
+            if not chunk_text.strip():
+                continue
             chunks.append({
                 "content": chunk_text,
                 "metadata": {**doc["metadata"], "chunk_index": i}
             })
+    return chunks
+
+
+def _fallback_split_text(text: str) -> list[str]:
+    """Local recursive-like splitter used when langchain-text-splitters is missing."""
+    chunks = []
+    current = ""
+
+    for paragraph in text.split("\n\n"):
+        paragraph = paragraph.strip()
+        if not paragraph:
+            continue
+
+        if len(paragraph) > CHUNK_SIZE:
+            if current:
+                chunks.append(current)
+                current = ""
+            chunks.extend(_split_long_text(paragraph))
+            continue
+
+        candidate = f"{current}\n\n{paragraph}" if current else paragraph
+        if len(candidate) <= CHUNK_SIZE:
+            current = candidate
+        else:
+            chunks.append(current)
+            current = paragraph
+
+    if current:
+        chunks.append(current)
+    return chunks
+
+
+def _split_long_text(text: str) -> list[str]:
+    chunks = []
+    step = max(1, CHUNK_SIZE - CHUNK_OVERLAP)
+    for start in range(0, len(text), step):
+        chunk = text[start:start + CHUNK_SIZE].strip()
+        if chunk:
+            chunks.append(chunk)
     return chunks
 
 

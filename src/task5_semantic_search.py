@@ -42,7 +42,10 @@ def semantic_search(query: str, top_k: int = 10) -> list[dict]:
         return []
 
     search_text = _generate_hypothetical_doc(query) if ENABLE_HYDE else query
-    query_vector = _get_embedding_model().encode(search_text).tolist()
+    model = _get_embedding_model()
+    if model is None:
+        return []
+    query_vector = model.encode(search_text).tolist()
 
     results = collection.query(
         query_embeddings=[query_vector],
@@ -83,9 +86,15 @@ def _generate_hypothetical_doc(query: str) -> str:
 
 @lru_cache(maxsize=1)
 def _get_embedding_model():
-    from sentence_transformers import SentenceTransformer
+    try:
+        from sentence_transformers import SentenceTransformer
+    except ImportError:
+        return None
 
-    return SentenceTransformer(EMBEDDING_MODEL)
+    try:
+        return SentenceTransformer(EMBEDDING_MODEL)
+    except Exception:
+        return None
 
 
 @lru_cache(maxsize=1)
@@ -93,7 +102,10 @@ def _get_collection():
     if not CHROMA_DIR.exists():
         return None
 
-    import chromadb
+    try:
+        import chromadb
+    except ImportError:
+        return None
 
     client = chromadb.PersistentClient(path=str(CHROMA_DIR))
     try:

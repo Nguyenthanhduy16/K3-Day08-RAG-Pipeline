@@ -22,7 +22,7 @@ import warnings
 from pathlib import Path
 from typing import Any, Iterator
 
-from dotenv import load_dotenv
+from .env_utils import load_dotenv
 
 load_dotenv()
 
@@ -356,7 +356,13 @@ def pageindex_search(query: str, top_k: int = 5) -> list[dict]:
         return []
     if not _configured_api_key():
         warnings.warn(
-            "Bỏ qua PageIndex fallback vì chưa cấu hình PAGEINDEX_API_KEY.",
+            "Skip PageIndex fallback because PAGEINDEX_API_KEY is not configured.",
+            RuntimeWarning,
+        )
+        return []
+    if PageIndexClient is None:
+        warnings.warn(
+            "Skip PageIndex fallback because PageIndex SDK is not installed.",
             RuntimeWarning,
         )
         return []
