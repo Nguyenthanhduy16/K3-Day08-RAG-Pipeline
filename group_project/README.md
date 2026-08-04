@@ -70,19 +70,55 @@ Xem code mẫu (DeepEval/RAGAS/TruLens) chi tiết trong `README.md` gốc mục
 ## Kiến Trúc Hệ Thống
 
 ```
-[Vẽ diagram kiến trúc ở đây]
+┌─────────────────────────────────────────────────────────────────┐
+│                      USER (Streamlit UI)                        │
+│                          app.py                                 │
+└────────────────────────────┬────────────────────────────────────┘
+                             │ query
+                             ▼
+┌─────────────────────────────────────────────────────────────────┐
+│               Task 9 — Retrieval Pipeline                       │
+│                                                                 │
+│  ┌─────────────────┐    ┌─────────────────┐                    │
+│  │ Task 5           │    │ Task 6           │                    │
+│  │ Semantic Search  │    │ Lexical Search   │                    │
+│  │ (ChromaDB cosine)│    │ (BM25 / TF-IDF)  │                    │
+│  └────────┬─────────┘    └────────┬─────────┘                    │
+│           │                       │                             │
+│           └──────────┬────────────┘                             │
+│                      ▼                                          │
+│              Task 7 — Reranking (RRF / Jina)                    │
+│                      │                                          │
+│                      ▼  score < threshold?                      │
+│              Task 8 — PageIndex Fallback                        │
+└────────────────────────────┬────────────────────────────────────┘
+                             │ top-k chunks
+                             ▼
+┌─────────────────────────────────────────────────────────────────┐
+│               Task 10 — Generation with Citation                │
+│   System Prompt + Context → GPT-4o-mini → Answer + [Source]     │
+└─────────────────────────────────────────────────────────────────┘
+                             │
+                             ▼
+┌─────────────────────────────────────────────────────────────────┐
+│          Group Evaluation — RAGAS Pipeline                      │
+│   golden_dataset.json → eval_pipeline.py → results.md          │
+│   Metrics: Faithfulness | Answer Relevance | Context Recall     │
+│            | Context Precision                                  │
+│   A/B test: Hybrid+Reranking vs Dense-Only                      │
+└─────────────────────────────────────────────────────────────────┘
 ```
 
 ---
 
 ## Phân Công Công Việc
 
-| Thành viên | MSSV | Nhiệm vụ | Trạng thái |
-|-----------|------|----------|------------|
-| | | | |
-| | | | |
-| | | | |
-| | | | |
+| Thành viên | MSSV | Vai trò | Nhiệm vụ | Trạng thái |
+|-----------|------|---------|----------|------------|
+| Nguyễn Thành Duy | 2A202601599 | Team Leader & RAG Architect | Điều phối tiến độ, ghép code tổng hợp, Task 9 (Retrieval Pipeline) | ✅ Hoàn thành |
+| Lê Trần Long | 2A202601257 | Data & Retrieval Specialist | Thu thập & chuẩn hoá dữ liệu (Task 1–3), xây dựng ChromaDB (Task 4–5) | ✅ Hoàn thành |
+| Nguyễn Minh Phúc | 2A202601161 | Frontend & Chatbot Developer | Xây dựng giao diện Streamlit (app.py), nối LLM Generation (Task 10) | ✅ Hoàn thành |
+| Thạch Minh Quân | 2A202601585 | Evaluation & QA Engineer | Tạo golden_dataset.json (20 Q&A), thực thi RAGAS eval_pipeline.py, viết results.md | ✅ Hoàn thành |
 
 ---
 
