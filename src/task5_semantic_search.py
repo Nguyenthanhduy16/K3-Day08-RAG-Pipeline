@@ -21,7 +21,12 @@ from .task4_chunking_indexing import (
 )
 
 
-ENABLE_HYDE = True
+# HyDE disabled: corpus is Vietnamese but HyDE generates English → embedding mismatch
+# Using raw query directly gives better results for Vietnamese queries
+ENABLE_HYDE = False
+
+# Minimum content length to filter out boilerplate intro chunks
+MIN_CONTENT_LENGTH = 150
 
 
 def semantic_search(query: str, top_k: int = 10) -> list[dict]:
@@ -72,7 +77,26 @@ def semantic_search(query: str, top_k: int = 10) -> list[dict]:
         })
 
     output.sort(key=lambda item: item["score"], reverse=True)
+
+    # Filter out boilerplate intro/header chunks that contain no useful game info
+    output = [
+        item for item in output
+        if len(item.get("content", "").strip()) >= MIN_CONTENT_LENGTH
+        and not _is_boilerplate(item.get("content", ""))
+    ]
+
     return output[:top_k]
+
+
+def _is_boilerplate(text: str) -> bool:
+    """Detect document intro/header chunks that have no actual game information."""
+    boilerplate_markers = [
+        "This is a snapshot of the Uma Musume Reference doc",
+        "This document assumes you've completed",
+        "By Erzzy#1197",
+        "Uma Musume EN Discord",
+    ]
+    return any(marker.lower() in text.lower() for marker in boilerplate_markers)
 
 
 def _generate_hypothetical_doc(query: str) -> str:
