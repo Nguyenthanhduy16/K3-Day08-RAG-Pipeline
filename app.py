@@ -147,7 +147,7 @@ st.markdown("<h1 style='text-align: center; margin-bottom: 2rem; font-size: 3rem
 # SIDEBAR NAVIGATION
 # ==========================================
 with st.sidebar:
-    st.image("https://upload.wikimedia.org/wikipedia/en/thumb/9/91/Uma_Musume_Pretty_Derby_logo.png/220px-Uma_Musume_Pretty_Derby_logo.png", use_container_width=True)
+    st.image("https://upload.wikimedia.org/wikipedia/en/thumb/9/91/Uma_Musume_Pretty_Derby_logo.png/220px-Uma_Musume_Pretty_Derby_logo.png", width="stretch")
     st.markdown("<br>", unsafe_allow_html=True)
     
     menu_selection = st.radio(

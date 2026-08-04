@@ -233,7 +233,7 @@ def upload_documents(client: Any | None = None) -> dict[str, str]:
     for markdown_path in markdown_files:
         cache_key = markdown_path.relative_to(STANDARDIZED_DIR).as_posix()
         if cache_key in doc_ids:
-            print(f"  ↷ Cached: {cache_key} -> {doc_ids[cache_key]}")
+            print(f"  [Cached]: {cache_key} -> {doc_ids[cache_key]}")
             continue
 
         pdf_path = _pdf_path_for(markdown_path)
@@ -249,7 +249,7 @@ def upload_documents(client: Any | None = None) -> dict[str, str]:
 
         doc_ids[cache_key] = doc_id
         _save_doc_ids(doc_ids)  # Không mất các upload trước nếu lần sau bị lỗi.
-        print(f"  ✓ Uploaded: {cache_key} -> {doc_id}")
+        print(f"  [Uploaded]: {cache_key} -> {doc_id}")
 
     return doc_ids
 
@@ -402,7 +402,7 @@ def pageindex_search(query: str, top_k: int = 5) -> list[dict]:
 
 if __name__ == "__main__":
     if not _configured_api_key():
-        print("⚠ Hãy set PAGEINDEX_API_KEY trong file .env")
+        print("[Warning] Hãy set PAGEINDEX_API_KEY trong file .env")
         print("  Đăng ký tại: https://pageindex.ai/")
     else:
         print("Uploading documents...")
