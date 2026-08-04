@@ -101,54 +101,52 @@ def generate_with_citation(query: str, top_k: int = TOP_K) -> dict:
     """
     End-to-end RAG generation with citations.
     """
+    # Step 1: Retrieve
     chunks = retrieve(query, top_k=top_k)
+
+    # Step 2: Reorder
     reordered = reorder_for_llm(chunks)
+
+    # Step 3: Format context
     context = format_context(reordered)
 
-    if not chunks:
-        return {
-            "answer": "I cannot verify this information from the available sources.",
-            "sources": [],
-            "retrieval_source": "none",
-        }
+    # Step 4: Build prompt
+    user_message = f"""Context:\n{context}\n\n---\n\nQuestion: {query}"""
 
-    api_key = os.getenv("OPENROUTER_API_KEY") or os.getenv("OPENAI_API_KEY")
-    if api_key:
-        try:
-            from openai import OpenAI
-
-            client = OpenAI(api_key=api_key, base_url="https://openrouter.ai/api/v1")
-            user_message = f"Context:\n{context}\n\n---\n\nQuestion: {query}"
-            response = client.chat.completions.create(
-                model=LLM_MODEL,
-                messages=[
-                    {"role": "system", "content": SYSTEM_PROMPT},
-                    {"role": "user", "content": user_message},
-                ],
-                temperature=TEMPERATURE,
-                top_p=TOP_P,
-            )
-            answer = response.choices[0].message.content
-        except Exception:
-            answer = _fallback_answer(query, reordered)
+    # Step 5: Call LLM (OpenRouter — OpenAI-compatible API)
+    from openai import OpenAI
+    api_key = os.getenv("OPENAI_API_KEY") or os.getenv("OPENROUTER_API_KEY")
+    
+    if api_key and api_key.startswith("sk-proj-"):
+        base_url = None
+        model = "gpt-4o-mini"
+    elif api_key and api_key.startswith("sk-or-v1-"):
+        base_url = "https://openrouter.ai/api/v1"
+        model = LLM_MODEL
     else:
-        answer = _fallback_answer(query, reordered)
+        base_url = None
+        model = "gpt-4o-mini"
+        
+    client = OpenAI(api_key=api_key, base_url=base_url)
 
+    response = client.chat.completions.create(
+        model=model,
+        messages=[
+            {"role": "system", "content": SYSTEM_PROMPT},
+            {"role": "user", "content": user_message}
+        ],
+        temperature=TEMPERATURE,
+        top_p=TOP_P,
+    )
+
+    answer = response.choices[0].message.content
+
+    # Step 6: Return
     return {
         "answer": answer,
         "sources": chunks,
-        "retrieval_source": chunks[0].get("source", "hybrid") if chunks else "none",
+        "retrieval_source": chunks[0].get("source", "hybrid") if chunks else "none"
     }
-
-
-def _fallback_answer(query: str, chunks: list[dict]) -> str:
-    metadata = chunks[0].get("metadata", {}) or {}
-    source = metadata.get("source") or metadata.get("document") or "retrieved source"
-    snippet = chunks[0].get("content", "").strip().replace("\n", " ")[:700]
-    return (
-        f"Based on the retrieved source, the question '{query}' has related information in "
-        f"[{source}]. {snippet} [{source}]"
-    )
 
 
 if __name__ == "__main__":

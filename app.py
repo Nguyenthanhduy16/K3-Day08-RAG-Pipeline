@@ -1,151 +1,159 @@
-"""
-RAG Chatbot — University Services (Starter Template)
-Streamlit app kết nối RAG Retrieval (Task 9) và Generation (Task 10).
-
-Chạy:
-    streamlit run app.py
-"""
-
-import os
-import sys
-from pathlib import Path
-
 import streamlit as st
+import os
+import chromadb
+from openai import OpenAI
 from dotenv import load_dotenv
 
 load_dotenv()
 
-# Thêm project root vào sys.path để import các task từ src/
-PROJECT_ROOT = Path(__file__).parent
-sys.path.insert(0, str(PROJECT_ROOT))
-
-# =============================================================================
+# ==========================================
 # PAGE CONFIG
-# =============================================================================
-
+# ==========================================
 st.set_page_config(
-    page_title="University Services RAG Chatbot",
-    page_icon="🎓",
-    layout="wide",
-    initial_sidebar_state="expanded",
+    page_title="RAG Chatbot Demo",
+    page_icon="🤖",
+    layout="centered"
 )
 
-# =============================================================================
-# SIDEBAR — INFO & SETTINGS
-# =============================================================================
+st.title("🤖 RAG Chatbot Demo Lab")
+st.caption("Ứng dụng hỏi đáp AI với dữ liệu nội bộ (có trích dẫn nguồn)")
 
+# ==========================================
+# CHROMA DB INIT
+# ==========================================
+@st.cache_resource
+def get_chroma_collection():
+    try:
+        if os.path.exists('./chroma_db'):
+            client = chromadb.PersistentClient(path='./chroma_db')
+            collections = client.list_collections()
+            if collections:
+                # Lấy collection đầu tiên
+                col_name = collections[0].name if hasattr(collections[0], 'name') else collections[0]
+                return client.get_collection(col_name)
+    except Exception as e:
+        st.error(f"Lỗi khởi tạo ChromaDB: {e}")
+    return None
+
+collection = get_chroma_collection()
+
+# ==========================================
+# SIDEBAR
+# ==========================================
 with st.sidebar:
-    st.title("🎓 University Services RAG")
-    st.caption("Trợ lý hỏi đáp về dịch vụ và chính sách đại học (học phí, học bổng, ký túc xá, thư viện)")
-
+    st.header("⚙️ Cấu hình")
+    api_key_input = st.text_input("OpenAI API Key", type="password", placeholder="sk-...", help="Nhập API Key hoặc để trống nếu đã có trong file .env")
+    openai_api_key = api_key_input if api_key_input else os.getenv("OPENAI_API_KEY")
+    
     st.divider()
+    st.subheader("Trạng thái kết nối")
+    if collection:
+        st.success(f"✅ Đã kết nối ChromaDB")
+    else:
+        st.warning("⚠️ Không tìm thấy ChromaDB")
 
-    st.subheader("💡 Câu hỏi gợi ý")
-    suggestions = [
-        "Học phí tại RMIT Vietnam là bao nhiêu?",
-        "Làm sao để đặt phòng học nhóm ở thư viện?",
-        "Điều kiện xin học bổng Academic Achievement?",
-        "Dịch vụ hỗ trợ chỗ ở cho sinh viên như thế nào?",
-        "Cách đăng ký học phần qua myRMIT?",
-    ]
-    for s in suggestions:
-        if st.button(s, use_container_width=True, key=f"sug_{s[:20]}"):
-            st.session_state["pending_query"] = s
-
-    st.divider()
-    st.subheader("⚙️ Thiết lập")
-    top_k = st.slider("Số chunks retrieval (top_k)", 3, 10, 5)
-
-    st.divider()
-    st.caption("**Kiến trúc hệ thống:**")
-    st.caption("Hybrid Retrieval (Semantic + BM25) → RRF Rerank → PageIndex Fallback → LLM Generation có Citation")
-
-# =============================================================================
-# SESSION STATE
-# =============================================================================
-
+# ==========================================
+# CHATBOT STATE & UI
+# ==========================================
 if "messages" not in st.session_state:
-    st.session_state.messages = []
-if "pending_query" not in st.session_state:
-    st.session_state.pending_query = None
+    st.session_state.messages = [
+        {"role": "assistant", "content": "Xin chào! Tôi là AI trợ lý. Bạn có câu hỏi gì cần tôi giải đáp dựa trên dữ liệu lab không?"}
+    ]
 
-# =============================================================================
-# MAIN CHAT AREA
-# =============================================================================
-
-st.title("🎓 University Services RAG Chatbot")
-st.caption("Hệ thống hỏi đáp thông tin dịch vụ đại học (Học phí, Học bổng, Ký túc xá, Thư viện)")
-
-# Hiển thị lịch sử chat
+# Render lịch sử chat
 for msg in st.session_state.messages:
     with st.chat_message(msg["role"]):
         st.markdown(msg["content"])
-        if msg["role"] == "assistant" and "sources" in msg and msg["sources"]:
-            with st.expander(f"📚 Nguồn tham khảo ({len(msg['sources'])} chunks)"):
-                for i, src in enumerate(msg["sources"], 1):
-                    meta = src.get("metadata", {})
-                    source_name = meta.get("source", "Unknown")
-                    doc_type = meta.get("type", "unknown")
-                    score = src.get("score", 0)
-                    st.markdown(f"**[{i}] {source_name}** `{doc_type}` | score: `{score:.4f}`")
-                    st.text(src.get("content", "")[:300] + "...")
-                    st.divider()
+        # Nếu có thông tin nguồn, hiển thị ra
+        if "citations" in msg and msg["citations"]:
+            with st.expander("📚 Nguồn trích dẫn"):
+                for cit in msg["citations"]:
+                    st.markdown(f"- **{cit['source']}**\\n  - *Trích đoạn*: {cit['content'][:150]}...")
 
-# =============================================================================
-# QUERY HANDLING
-# =============================================================================
+# ==========================================
+# XỬ LÝ INPUT NGƯỜI DÙNG
+# ==========================================
+user_input = st.chat_input("Nhập câu hỏi của bạn...")
 
-# Xử lý khi bấm nút gợi ý hoặc nhập câu hỏi mới
-user_input = st.chat_input("Nhập câu hỏi của bạn về chính sách/dịch vụ đại học...")
-query = user_input or st.session_state.pending_query
-
-if query:
-    st.session_state.pending_query = None
-
-    # Hiển thị câu hỏi của user
-    st.session_state.messages.append({"role": "user", "content": query})
+if user_input:
+    # 1. Thêm câu hỏi của user vào giao diện
+    st.session_state.messages.append({"role": "user", "content": user_input})
     with st.chat_message("user"):
-        st.markdown(query)
-
-    # Sinh câu trả lời từ RAG Pipeline
+        st.markdown(user_input)
+        
+    # 2. Sinh câu trả lời của Assistant
     with st.chat_message("assistant"):
-        with st.spinner("Đang tìm kiếm tài liệu và tổng hợp câu trả lời..."):
-            try:
-                # TODO (Học viên): Tích hợp hàm sinh câu trả lời từ Task 10
-                # Ví dụ:
-                # from src.task10_generation import generate_with_citation
-                # response = generate_with_citation(query, top_k=top_k)
-                # answer = response["answer"]
-                # sources = response.get("sources", [])
+        if not openai_api_key:
+            error_msg = "⚠️ Vui lòng nhập OpenAI API Key ở thanh bên để tiếp tục."
+            st.warning(error_msg)
+            st.session_state.messages.append({"role": "assistant", "content": error_msg})
+        else:
+            with st.spinner("Đang tìm kiếm thông tin..."):
+                try:
+                    context = ""
+                    citations = []
+                    
+                    # Truy xuất thông tin từ ChromaDB
+                    if collection:
+                        results = collection.query(
+                            query_texts=[user_input],
+                            n_results=3
+                        )
+                        
+                        if results and 'documents' in results and results['documents']:
+                            retrieved_docs = results['documents'][0]
+                            retrieved_metadatas = results['metadatas'][0] if 'metadatas' in results else []
+                            
+                            for idx, doc in enumerate(retrieved_docs):
+                                metadata = retrieved_metadatas[idx] if idx < len(retrieved_metadatas) else {}
+                                source = metadata.get('source', metadata.get('filename', f'Tài liệu {idx+1}'))
+                                
+                                context += f"[{source}]\\n{doc}\\n\\n"
+                                citations.append({
+                                    "source": source,
+                                    "content": doc
+                                })
+                                
+                    # Khởi tạo OpenAI Client
+                    client = OpenAI(api_key=openai_api_key)
+                    
+                    prompt = f"""Bạn là trợ lý AI. Dựa vào thông tin BỐI CẢNH dưới đây, hãy trả lời câu hỏi của người dùng.
+Trong câu trả lời, hãy trích dẫn ngắn gọn nguồn tài liệu (ví dụ: "[Tên_Tài_liệu]").
+Nếu bối cảnh không chứa thông tin, hãy nói rõ là "Tôi không tìm thấy thông tin trong tài liệu".
 
-                # Tạm thời mockup để test UI:
-                from src.task10_generation import generate_with_citation
-                response = generate_with_citation(query, top_k=top_k)
-                answer = response.get("answer", "Chưa thể trả lời.")
-                sources = response.get("sources", [])
+BỐI CẢNH TỪ TÀI LIỆU:
+{context}
 
-            except NotImplementedError:
-                answer = "⚠️ **Task 10 chưa được implement.** Hãy hoàn thành `src/task10_generation.py` để kết nối pipeline vào UI!"
-                sources = []
-            except Exception as e:
-                answer = f"❌ **Lỗi khi chạy RAG Pipeline:** {e}"
-                sources = []
+CÂU HỎI CỦA NGƯỜI DÙNG: {user_input}
+"""
+                    
+                    # Gọi API
+                    stream = client.chat.completions.create(
+                        model="gpt-3.5-turbo",
+                        messages=[
+                            {"role": "system", "content": "Bạn là AI trợ lý trả lời câu hỏi dựa trên tài liệu cung cấp. Luôn sử dụng tiếng Việt."},
+                            {"role": "user", "content": prompt}
+                        ],
+                        stream=True,
+                    )
+                    
+                    # Stream kết quả
+                    response = st.write_stream(stream)
+                    
+                    # Hiển thị nguồn trực tiếp dưới câu trả lời
+                    if citations:
+                        with st.expander("📚 Nguồn trích dẫn"):
+                            for cit in citations:
+                                st.markdown(f"- **{cit['source']}**\\n  - *Trích đoạn*: {cit['content'][:150]}...")
+                                
+                    # Lưu vào lịch sử chat
+                    st.session_state.messages.append({
+                        "role": "assistant", 
+                        "content": response,
+                        "citations": citations
+                    })
+                    
+                except Exception as e:
+                    st.error(f"Lỗi: {e}")
+                    st.session_state.messages.append({"role": "assistant", "content": f"Lỗi: {e}"})
 
-            st.markdown(answer)
-
-            if sources:
-                with st.expander(f"📚 Nguồn tham khảo ({len(sources)} chunks)"):
-                    for i, src in enumerate(sources, 1):
-                        meta = src.get("metadata", {})
-                        source_name = meta.get("source", "Unknown")
-                        doc_type = meta.get("type", "unknown")
-                        score = src.get("score", 0)
-                        st.markdown(f"**[{i}] {source_name}** `{doc_type}` | score: `{score:.4f}`")
-                        st.text(src.get("content", "")[:300] + "...")
-                        st.divider()
-
-    st.session_state.messages.append({
-        "role": "assistant",
-        "content": answer,
-        "sources": sources,
-    })

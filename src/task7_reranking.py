@@ -243,6 +243,13 @@ if __name__ == "__main__":
         {"content": "Scholarship eligibility requirements", "score": 0.6, "metadata": {}},
         {"content": "Library study room booking guide", "score": 0.5, "metadata": {}},
     ]
-    results = rerank("tuition fee payment", dummy_candidates, top_k=2)
-    for r in results:
-        print(f"[{r['score']:.3f}] {r['content']}")
+    
+    print("--- Testing RRF Reranking ---")
+    results_rrf = rerank("tuition fee payment", dummy_candidates, top_k=2, method="rrf")
+    for r in results_rrf:
+        print(f"[{r['score']:.4f}] {r['content']}")
+        
+    print("\n--- Testing Jina Cross-Encoder Reranking ---")
+    results_jina = rerank("tuition fee payment", dummy_candidates, top_k=2, method="cross_encoder")
+    for r in results_jina:
+        print(f"[{r['score']:.4f}] {r['content']}")
