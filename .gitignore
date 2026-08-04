@@ -2,7 +2,7 @@
 __pycache__/
 *.py[cod]
 *.pyo
-.venv/
+.venv
 venv/
 *.egg-info/
 
@@ -26,13 +26,42 @@ pageindex_pdfs/
 .DS_Store
 Thumbs.db
 
-# User exclusions
-data/landing/full_guide/
-*.rar
+# Generated/local data artifacts
+/data/landing/**
+!/data/landing/
+!/data/landing/.gitkeep
+!/data/landing/legal/
+!/data/landing/legal/.gitkeep
+!/data/landing/news/
+!/data/landing/news/.gitkeep
+/data/standardized/**
+!/data/standardized/
+!/data/standardized/.gitkeep
+!/data/standardized/legal/
+!/data/standardized/legal/.gitkeep
+!/data/standardized/news/
+!/data/standardized/news/.gitkeep
+/data/raw_markdown/**
+/data/full_guide/**
+/data/**/*.pdf
+/data/**/*.doc
+/data/**/*.docx
+/data/**/*.rar
+/data/**/*.zip
+/data/**/*.7z
+/data/**/*.tar
+/data/**/*.gz
 
-# Lab 08 local data exclusions
-data/landing/legal/
-data/landing/news/
-data/standardized/
+# Vector stores / local databases
 chroma_db/
+*.sqlite
+*.sqlite3
+*.db
+chatbot.db
 
+# Model / library caches
+.cache/
+.huggingface/
+.mypy_cache/
+.ruff_cache/
+.ipynb_checkpoints/

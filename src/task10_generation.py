@@ -14,7 +14,7 @@ Base URL: "https://openrouter.ai/api/v1", dùng chung interface với OpenAI SDK
 """
 
 import os
-from dotenv import load_dotenv
+from .env_utils import load_dotenv
 
 load_dotenv()
 
@@ -62,26 +62,13 @@ Quy tắc bắt buộc:
 
 def reorder_for_llm(chunks: list[dict]) -> list[dict]:
     """
-    Sắp xếp chunks để tránh "lost in the middle" effect.
-
-    LLM nhớ tốt thông tin ở ĐẦU và CUỐI prompt, quên thông tin ở GIỮA.
-    Strategy: đặt chunks quan trọng nhất ở đầu và cuối, kém quan trọng ở giữa.
-
-    Input order (by score):  [1, 2, 3, 4, 5]
-    Output order:            [1, 3, 5, 4, 2]
-    (best first, worst in middle, second-best last)
-
-    Args:
-        chunks: List sorted by score descending (from retrieval)
-
-    Returns:
-        List reordered để maximize LLM attention.
+    Reorder chunks to reduce lost-in-the-middle effects.
     """
     if len(chunks) <= 2:
         return chunks
 
-    front = chunks[::2]   # index 0, 2, 4 -> đặt ở đầu
-    back = chunks[1::2]   # index 1, 3    -> đặt ở cuối (reversed)
+    front = chunks[::2]
+    back = chunks[1::2]
     return front + back[::-1]
 
 
@@ -91,22 +78,17 @@ def reorder_for_llm(chunks: list[dict]) -> list[dict]:
 
 def format_context(chunks: list[dict]) -> str:
     """
-    Format chunks thành context string cho prompt.
-    Mỗi chunk có label source để LLM có thể cite.
-
-    Args:
-        chunks: List of {'content': str, 'metadata': dict, 'score': float}
-
-    Returns:
-        Formatted context string.
+    Format chunks into a prompt context string.
     """
     context_parts = []
     for i, chunk in enumerate(chunks, 1):
-        source = chunk.get("metadata", {}).get("source", f"Source {i}")
-        doc_type = chunk.get("metadata", {}).get("type", "unknown")
+        metadata = chunk.get("metadata", {}) or {}
+        source = metadata.get("source") or metadata.get("document") or f"Source {i}"
+        doc_type = metadata.get("type") or metadata.get("doc_type") or "unknown"
+        score = chunk.get("score", 0.0)
         context_parts.append(
-            f"[Document {i} | Source: {source} | Type: {doc_type}]\n"
-            f"{chunk['content']}\n"
+            f"[Document {i} | Source: {source} | Type: {doc_type} | Score: {score}]\n"
+            f"{chunk.get('content', '')}\n"
         )
     return "\n---\n".join(context_parts)
 
@@ -117,25 +99,7 @@ def format_context(chunks: list[dict]) -> str:
 
 def generate_with_citation(query: str, top_k: int = TOP_K) -> dict:
     """
-    End-to-end RAG generation có citation.
-
-    Pipeline:
-        1. Retrieve relevant chunks
-        2. Reorder để tránh lost in the middle
-        3. Format context với source labels
-        4. Build prompt (system + context + query)
-        5. Call LLM
-        6. Return answer + sources
-
-    Args:
-        query: Câu hỏi của user
-
-    Returns:
-        {
-            'answer': str,           # Câu trả lời có citation
-            'sources': list[dict],   # Các chunks đã dùng
-            'retrieval_source': str  # 'hybrid' hoặc 'pageindex'
-        }
+    End-to-end RAG generation with citations.
     """
     # Step 1: Retrieve
     chunks = retrieve(query, top_k=top_k)
