@@ -109,9 +109,16 @@ def _get_corpus() -> list[dict]:
     if CORPUS:
         return CORPUS
 
-    CORPUS = _load_corpus_from_markdown()
+    # Prioritize loading from ChromaDB to ensure BM25 uses the exact same chunks and prefixes
+    CORPUS = _load_corpus_from_chroma()
     if not CORPUS:
-        CORPUS = _load_corpus_from_chroma()
+        try:
+            from .task4_chunking_indexing import load_documents, chunk_documents
+            docs = load_documents()
+            CORPUS = chunk_documents(docs)
+        except ImportError:
+            # Fallback to local custom load if task4 is not importable
+            CORPUS = _load_corpus_from_markdown()
     return CORPUS
 
 

@@ -223,7 +223,6 @@ def chunk_documents(documents: list[dict]) -> list[dict]:
         )
 
         headers_to_split_on = [
-            ("#", "h1"),
             ("##", "h2"),
             ("###", "h3"),
         ]
@@ -244,19 +243,26 @@ def chunk_documents(documents: list[dict]) -> list[dict]:
     for doc in documents:
         md_chunks = md_splitter.split_text(doc["content"])
 
-        # Inject character name context directly into text to ensure BM25 & Semantic Search match
-        char_prefix = ""
         metadata = doc["metadata"]
-        if "character_en" in metadata and metadata["character_en"]:
-            char_prefix = f"Nhân vật (Character): {metadata['character_en']} ({metadata['character_jp']}) - thông tin cá nhân, profile, sinh nhật (birthdate), chỉ số (stats), cự ly (distance), chiến thuật (strategy), thích ứng (adaptability)\n\n"
-        elif "character_jp" in metadata and metadata["character_jp"]:
-            char_prefix = f"Nhân vật (Character): {metadata['character_jp']} - thông tin cá nhân, profile, sinh nhật (birthdate), chỉ số (stats), cự ly (distance), chiến thuật (strategy), thích ứng (adaptability)\n\n"
-
         chunk_index = 0
         for md_chunk in md_chunks:
             text = md_chunk.page_content
-            if char_prefix:
-                text = char_prefix + text
+
+            # Assign prefix dynamically: chunk_index 0 gets the rich prefix
+            current_prefix = ""
+            if "character_en" in metadata and metadata["character_en"]:
+                en = metadata["character_en"]
+                jp = metadata["character_jp"]
+                if chunk_index == 0:
+                    current_prefix = f"Nhân vật (Character): {en} ({jp}) - profile, thông tin cá nhân, stats, birthdate, adaptability, cự ly\n\n"
+                else:
+                    current_prefix = f"Nhân vật (Character): {en} ({jp})\n\n"
+            elif "character_jp" in metadata and metadata["character_jp"]:
+                jp = metadata["character_jp"]
+                if chunk_index == 0:
+                    current_prefix = f"Nhân vật (Character): {jp} - profile, thông tin cá nhân, stats, birthdate, adaptability, cự ly\n\n"
+                else:
+                    current_prefix = f"Nhân vật (Character): {jp}\n\n"
 
             # Merge heading metadata from splitter with document metadata
             heading_meta = md_chunk.metadata or {}
@@ -273,8 +279,8 @@ def chunk_documents(documents: list[dict]) -> list[dict]:
                     continue
                 # If chunk was sub-split, ensure sub_text keeps the prefix if it's not already there
                 final_text = sub_text
-                if char_prefix and not final_text.startswith(char_prefix.strip()):
-                    final_text = char_prefix + final_text
+                if current_prefix and not final_text.startswith(current_prefix.strip()):
+                    final_text = current_prefix + final_text
 
                 chunks.append({
                     "content": final_text,
@@ -298,16 +304,33 @@ def _fallback_chunk(documents: list[dict]) -> list[dict]:
         char_prefix = ""
         metadata = doc["metadata"]
         if "character_en" in metadata and metadata["character_en"]:
-            char_prefix = f"Nhân vật (Character): {metadata['character_en']} ({metadata['character_jp']}) - thông tin cá nhân, profile, sinh nhật (birthdate), chỉ số (stats), cự ly (distance), chiến thuật (strategy), thích ứng (adaptability)\n\n"
+            char_prefix = f"Nhân vật (Character): {metadata['character_en']} ({metadata['character_jp']})\n\n"
         elif "character_jp" in metadata and metadata["character_jp"]:
-            char_prefix = f"Nhân vật (Character): {metadata['character_jp']} - thông tin cá nhân, profile, sinh nhật (birthdate), chỉ số (stats), cự ly (distance), chiến thuật (strategy), thích ứng (adaptability)\n\n"
+            char_prefix = f"Nhân vật (Character): {metadata['character_jp']}\n\n"
 
         for i, chunk_text in enumerate(splits):
             if len(chunk_text.strip()) < 60:
                 continue
+            
+            # Assign prefix dynamically: the first split is the profile chunk.
+            current_prefix = ""
+            if "character_en" in metadata and metadata["character_en"]:
+                en = metadata["character_en"]
+                jp = metadata["character_jp"]
+                if i == 0:
+                    current_prefix = f"Nhân vật (Character): {en} ({jp}) - profile, thông tin cá nhân, stats, birthdate, adaptability, cự ly\n\n"
+                else:
+                    current_prefix = f"Nhân vật (Character): {en} ({jp})\n\n"
+            elif "character_jp" in metadata and metadata["character_jp"]:
+                jp = metadata["character_jp"]
+                if i == 0:
+                    current_prefix = f"Nhân vật (Character): {jp} - profile, thông tin cá nhân, stats, birthdate, adaptability, cự ly\n\n"
+                else:
+                    current_prefix = f"Nhân vật (Character): {jp}\n\n"
+
             final_text = chunk_text
-            if char_prefix:
-                final_text = char_prefix + final_text
+            if current_prefix:
+                final_text = current_prefix + final_text
             chunks.append({
                 "content": final_text,
                 "metadata": {**doc["metadata"], "chunk_index": i},

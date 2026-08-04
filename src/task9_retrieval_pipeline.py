@@ -52,16 +52,59 @@ def retrieve(
     """
     Retrieval pipeline ho?n ch?nh v?i fallback logic.
     """
-    # Step 1: Song song chạy semantic + lexical
-    dense_results = semantic_search(query, top_k=top_k * 2)
-    sparse_results = lexical_search(query, top_k=top_k * 2)
+    # Query expansion to bridge Vietnamese query intent with English database vocabulary
+    expanded_query = query
+    query_lower = query.lower()
+    
+    intent_mappings = {
+        ("sinh nhật", "sinh nhat", "ngày sinh", "ngay sinh"): "birthdate birthday",
+        ("chỉ số", "chi so", "stat"): "stats base stats",
+        ("cự ly", "cu ly"): "distance suitability",
+        ("chiến thuật", "chien thuat"): "strategy preferred strategy",
+        ("thích ứng", "thich ung"): "adaptability suitability",
+        ("kỹ năng", "ky nang"): "skills event choices",
+    }
+    
+    for triggers, translation in intent_mappings.items():
+        if any(trigger in query_lower for trigger in triggers):
+            expanded_query += f" {translation}"
+
+    # Step 1: Song song chạy semantic + lexical bằng expanded query để tăng độ khớp chéo ngôn ngữ
+    # Query candidate size is expanded internally to ensure rich candidates are matched
+    dense_results = semantic_search(expanded_query, top_k=max(20, top_k * 3))
+    sparse_results = lexical_search(expanded_query, top_k=max(20, top_k * 3))
 
     # Step 2: Merge bằng RRF
-    merged = rerank_rrf([dense_results, sparse_results], top_k=top_k * 2)
+    merged = rerank_rrf([dense_results, sparse_results], top_k=max(20, top_k * 3))
     for item in merged:
         item["source"] = "hybrid"
 
-    # Step 3: Rerank
+    # Step 3: Rerank / Boost chunks containing key information matching the query intent
+    # RRF fused rankings are good, but we boost chunks containing actual English targets of the query intent
+    boost_rules = [
+        (["sinh nhật", "sinh nhat", "ngày sinh", "ngay sinh"], ["birthdate", "birthday", "ngày sinh", "sinh nhật"]),
+        (["chỉ số", "chi so", "stat"], ["base stats", "stats", "chỉ số"]),
+        (["cự ly", "cu ly"], ["distance", "cự ly", "adaptability"]),
+        (["chiến thuật", "chien thuat"], ["strategy", "chiến thuật"]),
+        (["thích ứng", "thich ung"], ["adaptability", "thích ứng"]),
+    ]
+    
+    active_doc_terms = []
+    for triggers, doc_terms in boost_rules:
+        if any(trigger in query_lower for trigger in triggers):
+            active_doc_terms.extend(doc_terms)
+            
+    if active_doc_terms and merged:
+        boosted = []
+        others = []
+        for item in merged:
+            content_lower = item["content"].lower()
+            if any(term in content_lower for term in active_doc_terms):
+                boosted.append(item)
+            else:
+                others.append(item)
+        merged = boosted + others
+
     if use_reranking and merged:
         final_results = rerank(query, merged, top_k=top_k, method=RERANK_METHOD)
     else:

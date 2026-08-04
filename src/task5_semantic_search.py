@@ -26,7 +26,7 @@ from .task4_chunking_indexing import (
 ENABLE_HYDE = False
 
 # Minimum content length to filter out boilerplate intro chunks
-MIN_CONTENT_LENGTH = 150
+MIN_CONTENT_LENGTH = 10
 
 
 def semantic_search(query: str, top_k: int = 10) -> list[dict]:

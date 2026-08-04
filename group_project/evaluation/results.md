@@ -13,11 +13,11 @@
 
 | Metric | Config A (hybrid+rerank) | Config B (dense-only) | Delta |
 |--------|--------------------------|----------------------|-------|
-| Faithfulness | 0.7714 | 0.5972 | +0.1742 |
-| Answer Relevance | 0.6563 | 0.6559 | +0.0004 |
-| Context Recall | 0.6333 | 0.6500 | -0.0167 |
-| Context Precision | 0.6967 | 0.6967 | +0.0000 |
-| **Average** | **0.6894** | **0.6499** | **+0.0395** |
+| Faithfulness | 0.9333 | 0.5417 | +0.3917 |
+| Answer Relevance | 0.4936 | 0.4945 | -0.0009 |
+| Context Recall | 0.8000 | 0.7000 | +0.1000 |
+| Context Precision | 0.7608 | 0.7608 | +0.0000 |
+| **Average** | **0.7469** | **0.6243** | **+0.1227** |
 
 ---
 
@@ -32,7 +32,7 @@
 - Simpler but may miss relevant chunks that share few semantic overlaps.
 
 **Conclusion:**
-Config A (Hybrid + Reranking) outperforms Config B with a mean score advantage of **0.0395**.
+Config A (Hybrid + Reranking) outperforms Config B with a mean score advantage of **0.1227**.
 Jina Reranking improves context precision by surfacing the most semantically faithful chunks.
 
 ---
@@ -41,9 +41,9 @@ Jina Reranking improves context precision by surfacing the most semantically fai
 
 | # | Question (truncated) | Faithfulness | Answer Relevance | Context Recall | Root Cause |
 |---|----------------------|-------------|-----------------|----------------|------------|
-| 1 | Ngưỡng Guts mục tiêu cho cự ly Long 4000m là bao nhiêu? | 0.00 | 0.00 | 0.00 | Context too sparse or answer rejected by fallback guard |
-| 2 | Ngưỡng Guts mục tiêu của từng cự ly là bao nhiêu, và ý ... | 1.00 | 0.76 | 1.00 | Context too sparse or answer rejected by fallback guard |
-| 3 | Kỹ năng hồi phục (recovery skill) hồi lại bao nhiêu phầ... | 1.00 | 0.81 | 0.50 | Context too sparse or answer rejected by fallback guard |
+| 1 | Ngưỡng Guts mục tiêu cho cự ly Long 4000m là bao nhiêu? | nan | 0.00 | 0.00 | Context too sparse or answer rejected by fallback guard |
+| 2 | Công thức tính HP của một uma là gì, và hệ số Strategy ... | nan | 0.00 | 1.00 | Context too sparse or answer rejected by fallback guard |
+| 3 | Nếu uma của tôi có 1200 Speed, xác suất nhận được 3 sta... | 0.80 | 0.87 | 1.00 | Context too sparse or answer rejected by fallback guard |
 
 ---
 
