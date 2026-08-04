@@ -31,8 +31,7 @@ data/landing/full_guide/
 *.rar
 
 # Lab 08 local data exclusions
-data/landing/legal/
-data/landing/news/
+data/landing/
 data/standardized/
 chroma_db/
 
