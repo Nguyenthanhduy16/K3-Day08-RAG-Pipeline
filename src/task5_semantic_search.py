@@ -9,10 +9,16 @@ Yeu cau:
     - Phai tuong thich voi embedding model va vector store o Task 4
 """
 
+import os
 from functools import lru_cache
 from typing import Any
 
-from .task4_chunking_indexing import CHROMA_DIR, COLLECTION_NAME, EMBEDDING_MODEL
+from .task4_chunking_indexing import (
+    CHROMA_DIR,
+    COLLECTION_NAME,
+    EMBEDDING_MODEL,
+    EMBEDDING_DIM,
+)
 
 
 ENABLE_HYDE = True
@@ -42,10 +48,9 @@ def semantic_search(query: str, top_k: int = 10) -> list[dict]:
         return []
 
     search_text = _generate_hypothetical_doc(query) if ENABLE_HYDE else query
-    model = _get_embedding_model()
-    if model is None:
+    query_vector = _embed_query(search_text)
+    if query_vector is None:
         return []
-    query_vector = model.encode(search_text).tolist()
 
     results = collection.query(
         query_embeddings=[query_vector],
@@ -84,14 +89,43 @@ def _generate_hypothetical_doc(query: str) -> str:
     )
 
 
-@lru_cache(maxsize=1)
-def _get_embedding_model():
+def _embed_query(text: str) -> list[float] | None:
+    """
+    Embed query using the same model/API used during indexing (Task 4).
+    Falls back to SentenceTransformer for local models.
+    """
+    # OpenAI models (text-embedding-*) must use the OpenAI API
+    if "text-embedding" in EMBEDDING_MODEL or EMBEDDING_MODEL.startswith("openai"):
+        return _embed_openai(text)
+    # Local sentence-transformer models
+    model = _get_sentence_transformer()
+    if model is None:
+        return None
+    return model.encode(text).tolist()
+
+
+def _embed_openai(text: str) -> list[float] | None:
+    """Call OpenAI Embeddings API - same as used in task4 indexing."""
     try:
-        from sentence_transformers import SentenceTransformer
-    except ImportError:
+        from openai import OpenAI
+        api_key = os.getenv("OPENAI_API_KEY")
+        if not api_key:
+            return None
+        client = OpenAI(api_key=api_key)
+        response = client.embeddings.create(
+            input=[text],
+            model=EMBEDDING_MODEL,
+            dimensions=EMBEDDING_DIM,
+        )
+        return response.data[0].embedding
+    except Exception:
         return None
 
+
+@lru_cache(maxsize=1)
+def _get_sentence_transformer():
     try:
+        from sentence_transformers import SentenceTransformer
         return SentenceTransformer(EMBEDDING_MODEL)
     except Exception:
         return None

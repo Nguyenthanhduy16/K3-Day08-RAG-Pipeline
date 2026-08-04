@@ -44,10 +44,11 @@ CHROMA_DIR = Path(__file__).parent.parent / "chroma_db"
 # CONFIGURATION — Giải thích lựa chọn của bạn trong comment
 # =============================================================================
 
-# TODO: Chọn chunking strategy và giải thích vì sao
-CHUNK_SIZE = 500        # Vì sao chọn 500? ...
-CHUNK_OVERLAP = 50      # Vì sao chọn 50? ...
-CHUNKING_METHOD = "recursive"  # "recursive" | "markdown_header" | "semantic"
+# Markdown header splitting giữ nguyên context theo section (## / ###)
+# Các section lớn hơn CHUNK_SIZE sẽ được split tiếp bằng RecursiveCharacterTextSplitter
+CHUNK_SIZE = 800        # Tăng từ 500 → 800: mỗi section Uma Musume khá dài
+CHUNK_OVERLAP = 150     # Tăng từ 50 → 150: giảm mất context ở ranh giới chunk
+CHUNKING_METHOD = "markdown_header"  # "recursive" | "markdown_header" | "semantic"
 
 # TODO: Chọn embedding model và giải thích
 EMBEDDING_MODEL = "text-embedding-3-small"  # Sử dụng OpenAI API nhẹ nhàng, nhanh chóng và chất lượng cao
@@ -83,32 +84,80 @@ def load_documents() -> list[dict]:
 
 def chunk_documents(documents: list[dict]) -> list[dict]:
     """
-    Chunk documents using the configured strategy.
+    Chunk documents using MarkdownHeaderTextSplitter.
 
-    Returns:
-        List of {'content': str, 'metadata': dict}; each item is one chunk.
+    Strategy:
+    1. Split on ## and ### headings to keep each section self-contained.
+    2. Sub-split any section > CHUNK_SIZE chars with RecursiveCharacterTextSplitter
+       to avoid feeding the LLM an oversized context block.
+    3. Heading text is added to chunk metadata for richer citations.
     """
     try:
-        from langchain_text_splitters import RecursiveCharacterTextSplitter
+        from langchain_text_splitters import (
+            MarkdownHeaderTextSplitter,
+            RecursiveCharacterTextSplitter,
+        )
 
-        splitter = RecursiveCharacterTextSplitter(
+        headers_to_split_on = [
+            ("#", "h1"),
+            ("##", "h2"),
+            ("###", "h3"),
+        ]
+        md_splitter = MarkdownHeaderTextSplitter(
+            headers_to_split_on=headers_to_split_on,
+            strip_headers=False,
+        )
+        sub_splitter = RecursiveCharacterTextSplitter(
             chunk_size=CHUNK_SIZE,
             chunk_overlap=CHUNK_OVERLAP,
-            separators=["\n\n", "\n", ". ", " ", ""]
+            separators=["\n\n", "\n", ". ", " ", ""],
         )
-        split_text = splitter.split_text
     except ImportError:
-        split_text = _fallback_split_text
+        # Graceful fallback to the original recursive approach
+        return _fallback_chunk(documents)
 
     chunks = []
     for doc in documents:
-        splits = split_text(doc["content"])
+        md_chunks = md_splitter.split_text(doc["content"])
+
+        chunk_index = 0
+        for md_chunk in md_chunks:
+            text = md_chunk.page_content
+            # Merge heading metadata from splitter with document metadata
+            heading_meta = md_chunk.metadata or {}
+
+            if len(text) > CHUNK_SIZE:
+                sub_texts = sub_splitter.split_text(text)
+            else:
+                sub_texts = [text]
+
+            for sub_text in sub_texts:
+                if not sub_text.strip():
+                    continue
+                chunks.append({
+                    "content": sub_text,
+                    "metadata": {
+                        **doc["metadata"],
+                        **heading_meta,
+                        "chunk_index": chunk_index,
+                    },
+                })
+                chunk_index += 1
+
+    return chunks
+
+
+def _fallback_chunk(documents: list[dict]) -> list[dict]:
+    """Original recursive chunking — used when langchain-text-splitters is missing."""
+    chunks = []
+    for doc in documents:
+        splits = _fallback_split_text(doc["content"])
         for i, chunk_text in enumerate(splits):
             if not chunk_text.strip():
                 continue
             chunks.append({
                 "content": chunk_text,
-                "metadata": {**doc["metadata"], "chunk_index": i}
+                "metadata": {**doc["metadata"], "chunk_index": i},
             })
     return chunks
 
