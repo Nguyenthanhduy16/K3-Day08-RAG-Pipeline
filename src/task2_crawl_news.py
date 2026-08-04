@@ -31,9 +31,11 @@ def setup_directory():
 
 # TODO: Điền danh sách URL bài viết cần crawl
 ARTICLE_URLS = [
-    # Ví dụ (trang công khai RMIT Vietnam):
-    # "https://www.rmit.edu.vn/libraryvn/...",
-    # "https://www.rmit.edu.vn/students/...",
+    "https://uma.guide/guides/beginners-carats",
+    "https://uma.guide/guides/beginners-clubs",
+    "https://uma.guide/guides/beginners-cm",
+    "https://uma.guide/guides/beginners-dailies",
+    "https://uma.guide/guides/beginners-next-steps"
 ]
 
 
@@ -49,18 +51,32 @@ async def crawl_article(url: str) -> dict:
             "content_markdown": str
         }
     """
-    from crawl4ai import AsyncWebCrawler
+    import requests
+    import re
+    from markitdown import MarkItDown
 
-    # TODO: Implement crawling logic
-    # async with AsyncWebCrawler() as crawler:
-    #     result = await crawler.arun(url=url)
-    #     return {
-    #         "url": url,
-    #         "title": result.metadata.get("title", "Unknown"),
-    #         "date_crawled": datetime.now().isoformat(),
-    #         "content_markdown": result.markdown,
-    #     }
-    raise NotImplementedError("Implement crawl_article")
+    # Fetch title first
+    headers = {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+    }
+    response = requests.get(url, headers=headers)
+    response.encoding = 'utf-8'
+    html_content = response.text
+
+    title_match = re.search(r'<title>(.*?)</title>', html_content, re.IGNORECASE)
+    title = title_match.group(1).strip() if title_match else "Unknown"
+    title = re.sub(r'\s*\|\s*.*$', '', title) # Remove site name suffix
+
+    md = MarkItDown()
+    result = md.convert(url)
+    content_markdown = result.text_content
+
+    return {
+        "url": url,
+        "title": title,
+        "date_crawled": datetime.now().isoformat(),
+        "content_markdown": content_markdown,
+    }
 
 
 async def crawl_all():
@@ -74,13 +90,13 @@ async def crawl_all():
         # Lưu file JSON
         filename = f"article_{i:02d}.json"
         filepath = DATA_DIR / filename
-        filepath.write_text(json.dumps(article, ensure_ascii=False, indent=2))
-        print(f"  ✓ Saved: {filepath}")
+        filepath.write_text(json.dumps(article, ensure_ascii=False, indent=2), encoding="utf-8")
+        print(f"  OK Saved: {filepath}")
 
 
 if __name__ == "__main__":
     if not ARTICLE_URLS:
-        print("⚠ Hãy điền ARTICLE_URLS trước khi chạy!")
+        print("WARNING: Hãy điền ARTICLE_URLS trước khi chạy!")
         print("Gợi ý: tìm trang thông báo/sự kiện trên trang chính thức của trường đại học")
     else:
         asyncio.run(crawl_all())
