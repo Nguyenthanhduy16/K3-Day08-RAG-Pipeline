@@ -33,7 +33,8 @@
     "source_locator": "Stats > HP",
     "category": "skills",
     "hop": "single",
-    "difficulty": "easy"
+    "difficulty": "easy",
+    "note": "Dot du lieu moi (crawl 2026-08-04) BO SUNG nguon doc lap xac nhan con so nay: data/standardized/news/skills_recovery.md ghi '円弧のマエストロ (ID: 200351) - Effect Summary: Stamina Recovery +0.055, Rarity: 2' va 'コーナー回復○ (ID: 200352) - Stamina Recovery +0.015, Rarity: 1'. Tuc gold (rarity 2) = 5.5%, white (rarity 1) = 1.5%, khop voi PDF guide. Co the nang cau nay len dang cross-source neu muon kiem tra hop nhat bang chung tu 2 nguon khac dinh dang."
   },
   {
     "id": "Q04",
@@ -158,12 +159,12 @@
   },
   {
     "id": "Q14",
-    "question": "Tôi có được dùng cùng một uma ở nhiều hạng mục trong đội hình Stadium không?",
+    "question": "Tôi có được dùng cùng một uma ở nhiều hạng mục trong đội hình Team Trials không?",
     "expected_answer": "Không được. Mỗi uma chỉ dùng được một lần, nên cuối cùng bạn phải train đủ 15 uma khác nhau. Hai phiên bản khác nhau của cùng một uma cũng không được dùng chung, ví dụ Mejiro McQueen và Mejiro McQueen (End of Sky).",
     "expected_context": "You can't duplicate umas within your team. You can only use each uma once, so you'll eventually need to train fifteen unique umas. If an uma has two different versions, like Mejiro McQueen and Mejiro McQueen (End of Sky), you can't use both either.",
     "expected_citation": "[Uma Musume Reference Document (Grand Live snapshot), 2023]",
     "source_file": "data/standardized/legal/uma_musume_gl_guide.md",
-    "source_locator": "PvP - Stadium > Format",
+    "source_locator": "PvP - Team Trials > Format",
     "category": "pvp",
     "hop": "single",
     "difficulty": "easy"
@@ -211,11 +212,20 @@
     "expected_answer": "Turf hạng A và Dirt hạng G. Về cự ly: Short F, Mile C, Middle A, Long A. Nghĩa là Special Week phù hợp nhất với các race Middle và Long trên mặt sân Turf.",
     "expected_context": "Character Profile: スペシャルウィーク. Turf adaptability: A. Dirt adaptability: G. Short Distance: F. Mile Distance: C. Middle Distance: A. Long Distance: A.",
     "expected_citation": "[uma.guide, 2026]",
-    "source_file": "data/standardized/news/article_01.md",
-    "source_locator": "Aptitudes and Suitability",
+    "source_file": "data/standardized/news/char_1001_000.md",
+    "source_files_all": [
+      "data/standardized/news/char_1001_000.md",
+      "data/standardized/news/char_1001_001.md",
+      "data/standardized/news/char_1001_002.md",
+      "data/standardized/news/article_01.md",
+      "data/standardized/news/article_02.md",
+      "data/standardized/news/article_03.md"
+    ],
+    "source_locator": "Character Profile > aptitude fields",
     "category": "character_profile",
     "hop": "single",
-    "difficulty": "easy"
+    "difficulty": "easy",
+    "note": "CAP NHAT theo du lieu moi (crawl 2026-08-04). Truoc day nguon duy nhat la article_01.md; nay aptitude cua Special Week nam trong 6 file. CAU TRUC: char_1001_000/001/002.md KHONG phai ban sao trung lap - moi file la MOT PHIEN BAN cua uma (Special Week co 3 card: スペシャルドリーマー / ほっぴん♪ビタミンハート / 日之本一の総大将, dung 3 file). Da kiem chung tren toan corpus: 132/132 nhan vat co so file = so card. Rieng Special Week thi ca 3 phien ban TRUNG NHAU ve aptitude (Turf A / Dirt G / Short F / Mile C / Middle A / Long A) nen dap an khong bi anh huong. CANH BAO: dong Base Stats thi KHAC nhau giua 3 file vi la stat rieng cua tung phien ban, va file KHONG ghi ro no thuoc phien ban nao - tuyet doi khong ra de hoi base stat tu nhom file nay. article_01/02/03.md deu la Special Week (article_01 va article_02 trung bit-for-bit, md5 55fdd6ca...). Cham context_recall/precision phai chap nhan BAT KY file nao trong source_files_all."
   },
   {
     "id": "Q19",
@@ -223,11 +233,18 @@
     "expected_answer": "Nên dùng ở Mile và Middle vì cả hai đều hạng A. Nên tránh Long vì chỉ hạng E, và Short chỉ hạng D. Turf hạng A, Dirt hạng G nên chỉ hợp mặt sân Turf.",
     "expected_context": "Character Profile: サイレンススズカ. Turf adaptability: A. Dirt adaptability: G. Short Distance: D. Mile Distance: A. Middle Distance: A. Long Distance: E.",
     "expected_citation": "[uma.guide, 2026]",
-    "source_file": "data/standardized/news/article_04.md",
-    "source_locator": "Aptitudes and Suitability",
+    "source_file": "data/standardized/news/char_1002_003.md",
+    "source_files_all": [
+      "data/standardized/news/char_1002_003.md",
+      "data/standardized/news/char_1002_004.md",
+      "data/standardized/news/article_04.md",
+      "data/standardized/news/article_05.md"
+    ],
+    "source_locator": "Character Profile > aptitude fields",
     "category": "character_profile",
     "hop": "multi",
-    "difficulty": "medium"
+    "difficulty": "medium",
+    "note": "CAP NHAT theo du lieu moi (crawl 2026-08-04). Aptitude cua Silence Suzuka xuat hien o 4 file. char_1002_003.md va char_1002_004.md la HAI PHIEN BAN (2 card: サイレントイノセンス / 波間のエメラルド), khong phai ban sao. Ca 2 phien ban trung nhau ve aptitude (Turf A / Dirt G / Short D / Mile A / Middle A / Long E) nen dap an khong doi, nhung Base Stats thi khac nhau va file khong ghi ro phien ban - khong ra de hoi base stat tu nhom nay. article_04/05.md cung la Suzuka. Cham context_recall/precision phai chap nhan bat ky file nao trong source_files_all."
   },
   {
     "id": "Q20",
@@ -241,5 +258,122 @@
     "hop": "none",
     "difficulty": "hard",
     "note": "Cau hoi khong the tra loi tu corpus. Dung de kiem tra hanh vi tu choi theo yeu cau Task 10: khong du evidence thi phai tra ve 'I cannot verify this information' thay vi bia dap an."
+  },
+  {
+    "id": "Q21",
+    "question": "Trong scenario Grand Live, build cho cự ly Long 3000m+ có stat goal là bao nhiêu và nên inherit stat nào?",
+    "expected_answer": "Stat Goal là 1600/1000/1000/700/1000. Nên inherit Wisdom nếu chỉ dùng một Wisdom card, hoặc inherit Stamina nếu chỉ dùng một Stamina card. Nếu Stamina bonus dưới 20% thì nên dùng hai Stamina card. Card welfare McQueen tốt cho build này vì cho recovery.",
+    "expected_context": "Long (3000m+) Inherit Wisdom with one Wisdom Card, or Stamina if you're only using one Stamina card. If you have less than 20% Stamina bonus you should probably use two Stamina cards. Stat Goal: 1600/1000/1000/700/1000. The McQueen welfare is good here for the recovery.",
+    "expected_citation": "[Uma Musume Reference Document (Grand Live snapshot), 2023]",
+    "source_file": "data/standardized/legal/uma_musume_gl_guide.md",
+    "source_locator": "Support Card Builds > Grand Live",
+    "category": "support_card_build",
+    "hop": "single",
+    "difficulty": "easy",
+    "note": "Thu tu stat trong chuoi Stat Goal (Speed/Stamina/Power/Guts/Wisdom) KHONG duoc guide viet ra bang chu, chi suy dien gian tiep duoc: build MANT Mid/Long ghi 'Stat Goal: 1200/see chart/800/400/400' - slot 2 tro toi Required Stamina Chart nen la Stamina; build Wisdom nang slot 5 tu 400 len 1200 nen slot 5 la Wisdom. Vi vay khi cham KHONG bat buoc he thong gan nhan tung con so, chi can tra dung chuoi 1600/1000/1000/700/1000."
+  },
+  {
+    "id": "Q22",
+    "question": "Build Short/Mile trong Grand Live cần đạt bao nhiêu Speed, và nên dùng mấy card Speed?",
+    "expected_answer": "Cần 1600 Speed. Nếu các card Speed rất mạnh và uma có 20% Speed bonus thì dùng hai card Speed, ngược lại dùng ba card để đạt 1600 Speed một cách ổn định. Build áp dụng cho cự ly 1000~1900m, stat goal đầy đủ là 1600/500~700/1000/600~800/1200, inherit Guts ở Short và Stamina ở Mile.",
+    "expected_context": "Short/Mile (1000~1900m) If your Speed cards are very strong, and the uma has 20% Speed bonus, you can use two Speed cards. Otherwise, use three to reach 1600 Speed consistently. Inherit Guts in Short, Stam in Mile. Stat Goal: 1600/500~700/1000/600~800/1200",
+    "expected_citation": "[Uma Musume Reference Document (Grand Live snapshot), 2023]",
+    "source_file": "data/standardized/legal/uma_musume_gl_guide.md",
+    "source_locator": "Support Card Builds > Grand Live",
+    "category": "support_card_build",
+    "hop": "multi",
+    "difficulty": "medium",
+    "note": "Bay phan biet phien ban tai lieu, cung ho voi Q17. File uma_musume_general_guide.md (snapshot truoc MANT, trung bit-for-bit voi uma_musume_aoharu_guide.md - cung md5 f2d27e6e5132e7b7b999c4f5f47b2b8e) co muc Short voi 'Stat Goal: 1200/500/1200/300/400', tuc muc Speed 1200 chu khong phai 1600, va khong tach Short/Mile thanh mot build chung. Retriever lay nham file se tra ra con so sai."
+  },
+  {
+    "id": "Q23",
+    "question": "Với Kitasan Black ở max limit break, các passive stat stick cộng lại làm tăng stat thêm bao nhiêu phần trăm và tính như thế nào?",
+    "expected_answer": "Tổng cộng +81%. Cách tính: max motivation cho +20%, cộng thêm Motivation Bonus +30% của Kitasan thành +26% (hệ số 1.26). Training bonus cộng dồn theo phép cộng: 5% từ unique skill cộng 10% training bonus thành 15% (hệ số 1.15). Friendship bonus 25% nhân riêng (hệ số 1.25). Ba phần nhân với nhau: 1.26 × 1.15 × 1.25, tức tăng 81% stat.",
+    "expected_context": "Let's look at what's widely considered the best support card in the game, Kitasan Black, at max limit break. The Motivation Bonus is added to the bonus you get from motivation, which is +/- 10% per deviation from normal. So, with max motivation, it's +20%. With Kitasan's +30% Motivation Bonus, this gets to +26%. Increased Training and Friendship Bonus work multiplicatively with this. For unique skills, motivation bonus and training bonus are additive, while friendship bonus is multiplicative. She has a 5% training bonus from her unique skill, 10% training bonus, and 25% friendship bonus. All together, the stat gains will be multiplied by 1.26 * 1.15 * 1.25 for a total of +81% stats from these passives.",
+    "expected_citation": "[Uma Musume Reference Document (Grand Live snapshot), 2023]",
+    "source_file": "data/standardized/legal/uma_musume_gl_guide.md",
+    "source_locator": "Support Cards In Detail > Stat Stick Passives",
+    "category": "support_card_mechanics",
+    "hop": "multi",
+    "difficulty": "hard",
+    "note": "Bay distractor rong, sinh ra tu du lieu crawl moi 2026-08-04. File data/standardized/news/support_cards_speed.md CO entry '[Fire at My Heels] Kitasan Black' (SSR, Speed) voi dung cac ten truong ma cau hoi nhac toi - Friendship Bonus, Power Bonus, Training Effectiveness - NHUNG tat ca deu de TRONG (0/1088 dong bonus trong file nay co gia tri). Chunk do khop tu khoa gan nhu tuyet doi nen retriever se xep hang rat cao, trong khi cau tra loi that chi nam trong PDF guide. Day la phep thu tot cho kha nang bo qua chunk khop tu khoa nhung rong noi dung."
+  },
+  {
+    "id": "Q24",
+    "question": "Race Bonus tối đa đạt được là bao nhiêu, vì sao 50% là con số lý tưởng trong MANT, và ngưỡng nào cần đạt ở Aoharu/URA?",
+    "expected_answer": "Race Bonus cao nhất trên một card hiện là 15%, nên trần hiện tại là 90%. Cứ mỗi 10% cho thêm 1 stat từ race G1 và Finals, mỗi 12.5% cho thêm 1 stat từ G2/G3; số nhỏ nhất chia hết cho cả hai là 50, cho +5 từ G1 và +4 từ G2/G3, nên 50% là mức lý tưởng trong MANT, còn 40% làm giảm cả hai mức đi 1. Hammer nhân với Race Bonus ở ba race cuối theo hệ số 1.35, nên 50% thành 102% và 70% thành 129%. Ở Aoharu/URA, Race Bonus còn ảnh hưởng tới +3 all stats sau objective: đạt 34% thì lên +4, đạt 67% thì lên +5, nên build Aoharu/URA nên nhắm ít nhất 34%.",
+    "expected_context": "The highest Race Bonus on an individual card is currently 15%, so the current limit is 90%. The numbers are the way they are because every 10% results in +1 stat from the G1 races and finals, while every 12.5% results in +1 stat from the G2/G3 races. The first number divisible by both is 50, which gives +5 from G1s and +4 from G2/G3s, so 50% is the ideal number in MANT. 40% lowers both gains by 1. Hammers are multiplicative with Race Bonus, so for the final three races, the Race Bonus is multiplied by 1.35. So, 50% Race Bonus would become 102% Race Bonus, and 70% Race Bonus would become 129% Race Bonus. In Aoharu/URA, Race Bonus also affects the +3 all stats you get after objectives. This will increase to +4 all stats at 34% Race Bonus, and to +5 all stats at 67% Race Bonus. URA and Aoharu builds should aim for at least 34%.",
+    "expected_citation": "[Uma Musume Reference Document (Grand Live snapshot), 2023]",
+    "source_file": "data/standardized/legal/uma_musume_gl_guide.md",
+    "source_locator": "Support Cards In Detail > Race Bonus Benefits",
+    "category": "support_card_mechanics",
+    "hop": "multi",
+    "difficulty": "hard",
+    "note": "Cau ghep 3 y trong cung mot section: tran Race Bonus, ly do 50% toi uu o MANT, va nguong 34%/67% o Aoharu/URA. Kiem tra kha nang tong hop nhieu con so ma khong bo sot y nao."
+  },
+  {
+    "id": "Q25",
+    "question": "Group card khác card thường ở điểm nào, vào Passion Zone bằng những cách nào và có hạn chế gì khi ghép deck?",
+    "expected_answer": "Group card trông giống Friend card nhưng có thêm cơ chế Passion Zone: khi đang trong Passion Zone, card luôn kích hoạt rainbow training bất kể rơi vào training nào, và bạn cũng không bị ảnh hưởng bởi status xấu như Lazy hay Insomnia. Có ba cách vào Passion Zone: khi mở khóa được date với Group card (xảy ra ngẫu nhiên, dễ hơn ở green bond), khi thực hiện date cuối cùng (cách duy nhất kiểm soát được), và ngẫu nhiên sau khi train cùng card lúc Passion Zone chưa bật. Rời Passion Zone sau khoảng 2~5 turn, mang tính ngẫu nhiên. Hạn chế: Group card chứa nhiều uma bên trong nên không dùng chung với các uma đó, ví dụ Team Sirius không dùng cùng card Special Week; Team Sirius cũng không dùng được trong scenario Aoharu.",
+    "expected_context": "Group cards are a special type of card. They resemble Friend cards, but have additional mechanics that allow them to rainbow on any training. The main mechanic is called Passion Zone. While in the Passion Zone, the Group card will always trigger rainbow training no matter what it lands on, and you also won't be affected by bad statuses such as Lazy or Insomnia. You can enter the Passion Zone in three ways. 1. When you unlock the ability to go on dates with the Group card. This happens randomly, as with Friend cards, but is more likely at green bond. 2. When you do the final date with the Group Card. This is the only controlled activation. 3. Randomly after training with them while Passion Zone isn't active. You will leave the Passion Zone after 2~5 turns from what I've seen. It's random. Another note is that Group cards contain multiple umas within them. You can't use them alongside any of those. Team Sirius can't be used with Special Week cards and so on. Team Sirius also can't be used in the Aoharu scenario.",
+    "expected_citation": "[Uma Musume Reference Document (Grand Live snapshot), 2023]",
+    "source_file": "data/standardized/legal/uma_musume_gl_guide.md",
+    "source_locator": "Support Card Builds > Group Cards",
+    "category": "support_card_mechanics",
+    "hop": "single",
+    "difficulty": "medium"
+  },
+  {
+    "id": "Q26",
+    "question": "Base stat của Special Week là bao nhiêu?",
+    "expected_answer": "Không xác định được từ corpus. Special Week có ba phiên bản (スペシャルドリーマー, ほっぴん♪ビタミンハート, 日之本一の総大将) và tài liệu chứa ba bộ base stat khác nhau: Speed=102/Stamina=108/Power=120/Guts=110/Wisdom=110, Speed=94/Stamina=110/Power=125/Guts=119/Wisdom=102, và Speed=117/Stamina=100/Power=115/Guts=100/Wisdom=118. Không file nào ghi rõ bộ số nào thuộc phiên bản nào, nên cần hỏi rõ phiên bản trước khi trả lời thay vì chọn một con số.",
+    "expected_context": "# Character Profile: スペシャルウィーク ... - **Base Stats**: Speed=102, Stamina=108, Power=120, Guts=110, Wisdom=110 | - **Base Stats**: Speed=94, Stamina=110, Power=125, Guts=119, Wisdom=102 | - **Base Stats**: Speed=117, Stamina=100, Power=115, Guts=100, Wisdom=118 | ### Card: [スペシャルドリーマー] ### Card: [ほっぴん♪ビタミンハート] ### Card: [日之本一の総大将]",
+    "expected_citation": "[uma.guide, 2026]",
+    "source_file": "data/standardized/news/char_1001_000.md",
+    "source_files_all": [
+      "data/standardized/news/char_1001_000.md",
+      "data/standardized/news/char_1001_001.md",
+      "data/standardized/news/char_1001_002.md"
+    ],
+    "source_locator": "Character Profile > Base Stats",
+    "category": "underspecified",
+    "hop": "multi",
+    "difficulty": "hard",
+    "note": "Dang loi MOI, khac han 'unanswerable' cua Q04/Q20: o day bang chung CO TON TAI va cau hoi hop le, nhung corpus thieu mot chieu thong tin (nhan phien ban) nen khong the chon duoc dap an. Da kiem chung tren toan corpus: 132/132 nhan vat co so file = so card, tuc moi file la mot phien ban; 99/132 nhan vat co nhieu hon 1 phien ban va base stat khac nhau giua cac phien ban do. Ba file char_1001_* giong nhau y het tru dong Base Stats va timestamp, deu cung title va cung URL /character/1001, deu liet ke du ca 3 card - nen khong the suy ra file nao ung voi phien ban nao. CHAM DIEM: chap nhan ca hai kieu tra loi - (a) neu ro su bat dinh / hoi lai phien ban, hoac (b) tra ve 'I cannot verify this information'. Tra ve dung MOT bo so ma khong canh bao thi tinh la SAI. LUU Y cho Role 1/2: neu buoc standardize ghi ten card vao tung file thi cau nay tro thanh answerable va can viet lai."
+  },
+  {
+    "id": "Q27",
+    "question": "Skill 円弧のマエストロ thuộc loại gì, hồi phục bao nhiêu và kích hoạt trong điều kiện nào?",
+    "expected_answer": "Đây là một Gold Recovery: guide lấy chính skill này của Super Creek làm ví dụ cho Gold Recovery, và gold recovery hồi 5.5% HP. Cơ sở dữ liệu skill ghi 円弧のマエストロ có ID 200351, Effect Summary là Stamina Recovery +0.055 (đúng bằng 5.5%, khớp với guide) và Rarity 2. Điều kiện kích hoạt là phase==1&corner!=0, tức ở corner trong chặng giữa của race, đúng như mô tả gốc レース中盤のコーナーで持久力を回復する.",
+    "expected_context": "## Skill: 円弧のマエストロ (ID: 200351) - **Description**: レース中盤のコーナーで 持久力を回復する - **Effect Summary**: Stamina Recovery +0.055 - **Activation Condition**: phase==1&corner!=0 - **Rarity**: 2 || A Gold Recovery is a skill with a blue icon and gold border. For example, 円弧のマエストロ from Super Creek. || Recovery skills heal a percentage of your HP. A golden one will restore 5.5%, while a white will restore 1.5%.",
+    "expected_citation": "[uma.guide, 2026]; [Uma Musume Reference Document (Grand Live snapshot), 2023]",
+    "source_file": "data/standardized/news/skills_recovery.md",
+    "source_files_all": [
+      "data/standardized/news/skills_recovery.md",
+      "data/standardized/legal/uma_musume_gl_guide.md"
+    ],
+    "source_locator": "Skill Category: Recovery > 円弧のマエストロ (ID 200351)",
+    "category": "skills",
+    "hop": "multi",
+    "difficulty": "hard",
+    "note": "Cau CROSS-SOURCE that su: phai noi hai tai lieu khac dinh dang va khac ngon ngu. PDF guide cho biet 'gold recovery = 5.5%' va 円弧のマエストロ la vi du cua Gold Recovery, nhung KHONG co dieu kien kich hoat. File skills_recovery.md (crawl 2026-08-04) cho +0.055 / rarity 2 / phase==1&corner!=0 nhung KHONG dung chu 'gold'. Chi tra loi day du khi lay duoc ca hai. Dong thoi la phep kiem tra nhat quan: +0.055 khop 5.5%, va rarity 2 tuong ung gold (doi chieu コーナー回復○ ID 200352 = +0.015 rarity 1 = white 1.5%). Lien quan Q03."
+  },
+  {
+    "id": "Q28",
+    "question": "Narita Brian phù hợp nhất với cự ly nào, và nên tránh cự ly nào?",
+    "expected_answer": "Narita Brian hợp nhất với Middle và Long vì cả hai đều hạng A. Mile chỉ hạng B, còn Short hạng F nên cần tránh. Turf hạng A và Dirt hạng G nên chỉ chạy được mặt sân Turf.",
+    "expected_context": "| 1016 | Narita Brian | || # Character Profile: ナリタブライアン - **Turf adaptability**: A - **Dirt adaptability**: G - **Short Distance**: F - **Mile Distance**: B - **Middle Distance**: A - **Long Distance**: A",
+    "expected_citation": "[uma.guide, 2026]",
+    "source_file": "data/standardized/news/char_1016_039.md",
+    "source_files_all": [
+      "data/standardized/news/char_1016_039.md",
+      "data/standardized/news/char_1016_040.md",
+      "data/standardized/news/translation_glossary.md"
+    ],
+    "source_locator": "Character Profile > aptitude fields; Translation Glossary > charaName",
+    "category": "character_profile",
+    "hop": "multi",
+    "difficulty": "medium",
+    "note": "Kiem tra kha nang bac cau ten tieng Anh sang tieng Nhat. Cau hoi dung 'Narita Brian' nhung profile chi ghi ナリタブライアン - khong he co chuoi Latin 'Narita Brian' trong char_1016_*.md. Cau noi duy nhat la translation_glossary.md dong 28: '| 1016 | Narita Brian |', map ID sang ten tieng Anh, roi ID 1016 khop voi URL /character/1016 va ten file char_1016_*. BM25 thuan se truot vi khong match tu khoa; day la diem A/B tot giua dense-only va hybrid. Da verify ca 2 phien ban cua 1016 trung nhau ve aptitude nen dap an khong bi bat dinh nhu Q26."
   }
 ]
